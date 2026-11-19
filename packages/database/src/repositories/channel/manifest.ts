@@ -3,8 +3,10 @@ import {
   agentDisplayName,
   CHANNEL_DELETED_AGENT_NAME,
   CHANNEL_DELETED_USER_NAME,
+  channelMessageReceipt,
+  channelMessageVia,
 } from '@lobechat/types';
-import { and, asc, count, desc, eq, gt, isNull, lt, lte, notInArray, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, isNull, lt, lte, notInArray, or, sql } from 'drizzle-orm';
 
 import type {
   ChannelJobItem,
@@ -12,9 +14,11 @@ import type {
   ChannelMessageItem,
   ChannelThreadItem,
 } from '../../schemas';
-import { agents, channelMessages, users } from '../../schemas';
+import { agents, channelJobs, channelMessages, users } from '../../schemas';
 import type { LobeChatDatabase, Transaction } from '../../type';
 import { fileIdsByMessage } from './attachments';
+import { isAgentAuthored } from './author';
+import { messageStands } from './tombstone';
 
 /** Freeze the public history cutoff and branch for this request. */
 export const buildManifest = (params: {
@@ -50,8 +54,25 @@ const manifestScope = (channelId: string, manifest: ChannelInputManifest) => {
   return and(
     eq(channelMessages.channelId, channelId),
     lte(channelMessages.sequence, manifest.cutoffSequence),
+    // A message deleted after the manifest froze leaves the context it was in.
+    messageStands(),
     threadId
-      ? or(eq(channelMessages.threadId, threadId), mainPrefix)
+      ? // A request on the main timeline continued in an earlier Thread sits after its root,
+        // and so may the main-timeline message it quotes. Earlier requests continued there stay
+        // part of the Thread's history for every later run in it.
+        or(
+          eq(channelMessages.threadId, threadId),
+          mainPrefix,
+          eq(channelMessages.id, manifest.requestMessageId),
+          and(
+            isNull(channelMessages.threadId),
+            sql`${channelMessages.id} IN (SELECT ${channelJobs.messageId} FROM ${channelJobs} WHERE ${channelJobs.channelId} = ${channelId} AND ${channelJobs.threadId} = ${threadId})`,
+          ),
+          and(
+            isNull(channelMessages.threadId),
+            sql`${channelMessages.id} = (SELECT request.reply_to_id FROM channel_messages AS request WHERE request.id = ${manifest.requestMessageId} AND request.thread_id IS NULL)`,
+          ),
+        )
       : isNull(channelMessages.threadId),
   );
 };
@@ -111,6 +132,7 @@ export const readManifestMessages = async (
       username: users.username,
       content: channelMessages.content,
       id: channelMessages.id,
+      metadata: channelMessages.metadata,
       sequence: channelMessages.sequence,
       replyToId: channelMessages.replyToId,
       threadId: channelMessages.threadId,
@@ -129,7 +151,9 @@ export const readManifestMessages = async (
   );
 
   return visible.map((message) => {
-    const isAgent = message.routingStatus === 'reply';
+    const isAgent = isAgentAuthored(message);
+    const via = isAgent ? undefined : channelMessageVia(message.metadata);
+    const receipt = channelMessageReceipt(message.metadata);
     return {
       author: {
         id: isAgent ? message.agentId : message.userId,
@@ -146,6 +170,8 @@ export const readManifestMessages = async (
       sequence: message.sequence,
       replyToId: message.replyToId,
       threadId: message.threadId,
+      ...(receipt && { receipt }),
+      ...(via && { via }),
     };
   });
 };

@@ -1,7 +1,13 @@
 import type { SandboxStorageClaim } from '@lobechat/builtin-tool-cloud-sandbox';
+import { isOnDemandBuiltinTool } from '@lobechat/builtin-tools';
 import type { LobeChatDatabase } from '@lobechat/database';
+import { getImplicitBuiltinSkillIds } from '@lobechat/mecha/builtinSkillGate';
 import type { AgentSenderMetadata, ExecAgentResult, UserInterventionConfig } from '@lobechat/types';
-import { agentShareFileAccessScope, ordinaryFileAccessScope } from '@lobechat/types';
+import {
+  agentShareFileAccessScope,
+  ordinaryFileAccessScope,
+  resolveToolMode,
+} from '@lobechat/types';
 import { nanoid } from '@lobechat/utils';
 import debug from 'debug';
 
@@ -132,6 +138,8 @@ export const execAgentTurn = async (
     steer,
     trigger,
     cronJobId,
+    webhookThread,
+    openedByTopicId,
     taskId,
     evalContext,
     evalRuntime,
@@ -259,6 +267,7 @@ export const execAgentTurn = async (
     agentConfig,
     agentSlug,
     assistantAgentId,
+    autoSkillIds,
     canManageAgent,
     conversationAgentId,
     disabledPluginIds,
@@ -278,6 +287,7 @@ export const execAgentTurn = async (
         appContext,
         chatConfigOverride,
         agentConfigSnapshot: params.agentConfigSnapshot,
+        snapshotFollowsCallerDevice: params.snapshotFollowsCallerDevice,
         identifier,
         instructions,
         modelOverride,
@@ -438,19 +448,28 @@ export const execAgentTurn = async (
         botContext,
         botSender,
         clientIds,
-        continuationAssistantId,
+        continuationAssistantId: continuationAssistantId ?? params.reservedAssistantMessageId,
         conversationAgentId,
         createdThreadId,
         externalOrigin,
         cronJobId,
+        webhookThread,
+        openedByTopicId,
         files,
         modelOverride,
         operationTaskId,
         parentMessageId,
+        persistedUserMessageId:
+          suppressUserMessage &&
+          !effectiveResume &&
+          params.persistedUserMessageId === parentMessageId
+            ? params.persistedUserMessageId
+            : undefined,
         prompt,
         providerOverride,
         requestedDeviceId,
         requireDevice,
+        reservedOperationId: params.reservedOperationId,
         resolvedAgentId,
         resume,
         runFromHistory,
@@ -503,6 +522,7 @@ export const execAgentTurn = async (
           }
         : appContext,
     assistantMessageId: turn.assistantMessageId,
+    autoSkillIds,
     botContext,
     botPlatformContext,
     canUseDevice,
@@ -523,7 +543,10 @@ export const execAgentTurn = async (
     userMessageId: turn.userMessageId,
     // Exactly what the user row was persisted with, so every stage reads the
     // message the way a later turn reads it back from history.
-    userMessageMetadata: turn.userMessageId ? turn.requestTriggerMetadata : undefined,
+    userMessageMetadata:
+      turn.userMessageId || params.reservedAssistantMessageId
+        ? turn.requestTriggerMetadata
+        : undefined,
   };
 
   // Every caller that is not the plain composer (bots, group members,
@@ -554,6 +577,7 @@ export const execAgentTurn = async (
             bindTopicWorkingDirectory({ topicModel: deps.topicModel }, p),
           db: deps.db,
           getMarketService: (options) => deps.getMarketService(runFacts, options),
+          includeShareVisitor: !!runContext.shareGate,
           messageModel: deps.messageModel,
           resolveDeviceWorkspaceId: deps.resolveDeviceWorkspaceId,
           topicModel: deps.topicModel,
@@ -576,6 +600,7 @@ export const execAgentTurn = async (
           operationTaskId,
           // The hetero run settles its fee on `heteroFinish` under this id, so the
           // fee moves to it as soon as the durable operation row exists.
+          markTopicRunning: params.markTopicRunning,
           onOperationCreated: async (operationId) => {
             await bindRunFee(runFee, deps.userId, operationId);
             await params.onOperationCreated?.(operationId);
@@ -587,7 +612,10 @@ export const execAgentTurn = async (
           requestTrigger: requestTriggerMetadata.trigger,
           requestedDeviceId: turn.requestedDeviceId,
           runAttachments,
-          selfMessageIds,
+          selfMessageIds:
+            params.reservedAssistantMessageId && parentMessageId
+              ? new Set([...selfMessageIds, parentMessageId])
+              : selfMessageIds,
           topicStartOwnerOperationId: params.topicStartOwnerOperationId,
         },
       ),
@@ -601,10 +629,21 @@ export const execAgentTurn = async (
   }
 
   // 4. Fetch user settings (memory config + timezone)
-  const { enableExpertise, globalMemoryEnabled, userTimezone } = await traceSendStage(
-    'run_settings',
-    () => resolveRunSettings({ agentConfig, runFacts, shareGate }),
-  );
+  const { enableExpertise, globalMemoryEnabled, uninstalledBuiltinIds, userTimezone } =
+    await traceSendStage('run_settings', () =>
+      resolveRunSettings({ agentConfig, runFacts, shareGate, workspaceId: deps.workspaceId }),
+    );
+  if (!shareGate && !exclusivePluginIds && resolveToolMode(agentConfig.chatConfig) === 'agent') {
+    const implicitSkills = getImplicitBuiltinSkillIds(
+      agentConfig.createdAt,
+      agentConfig.chatConfig,
+    );
+    disabledPluginIds.push(
+      ...uninstalledBuiltinIds.filter(
+        (id) => isOnDemandBuiltinTool(id) || implicitSkills.includes(id),
+      ),
+    );
+  }
   log(
     'execAgent: globalMemoryEnabled=%s, timezone=%s',
     globalMemoryEnabled,
@@ -798,8 +837,10 @@ export const execAgentTurn = async (
         approvalClaim,
         approvalSourceOperationId,
         approvalSourceToolMessageIds,
+        autoSkillIds,
         autoStart,
         onOperationCreated: params.onOperationCreated,
+        markTopicRunning: params.markTopicRunning,
         // From here the run's completion releases the slot and settles the
         // fee; a run that never started (failed, or created without
         // auto-start) gives both back.

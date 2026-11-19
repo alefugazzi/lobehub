@@ -372,17 +372,6 @@ describe('mapFeatureFlagsEnvToState', () => {
     expect(mapFeatureFlagsEnvToState(config, 'user-456').enableAgentKnowledgeSpace).toBe(false);
   });
 
-  it('should keep the rail layout off by default and enable it per user or globally', () => {
-    expect(DEFAULT_FEATURE_FLAGS.im_layout).toBe(false);
-    expect(mapFeatureFlagsEnvToState(DEFAULT_FEATURE_FLAGS, 'user-1').enableImLayout).toBe(false);
-
-    expect(mapFeatureFlagsEnvToState({ im_layout: true }).enableImLayout).toBe(true);
-
-    const config = { im_layout: ['user-123'] };
-    expect(mapFeatureFlagsEnvToState(config, 'user-123').enableImLayout).toBe(true);
-    expect(mapFeatureFlagsEnvToState(config, 'user-456').enableImLayout).toBe(false);
-  });
-
   it('should keep Channels off by default and enable them per user or globally', () => {
     expect(DEFAULT_FEATURE_FLAGS.channel).toBe(false);
     expect(mapFeatureFlagsEnvToState(DEFAULT_FEATURE_FLAGS, 'user-1').enableChannels).toBe(false);
@@ -544,29 +533,32 @@ describe('mapFeatureFlagsEnvToState', () => {
     expect(mappedState.enableDashboard).toBe(false);
   });
 
-  describe('agent_runtime_strip_operation_toolset', () => {
+  describe('agent_runtime_slim_state', () => {
     it('is off by default', () => {
-      expect(DEFAULT_FEATURE_FLAGS.agent_runtime_strip_operation_toolset).toBe(false);
+      expect(DEFAULT_FEATURE_FLAGS.agent_runtime_slim_state).toBe(false);
+      expect(mapFeatureFlagsEnvToState(DEFAULT_FEATURE_FLAGS, 'user-1').enableSlimAgentState).toBe(
+        false,
+      );
+    });
+
+    it('maps true and a user allowlist', () => {
       expect(
-        mapFeatureFlagsEnvToState(DEFAULT_FEATURE_FLAGS, 'user-1').enableStripOperationToolset,
-      ).toBe(false);
+        mapFeatureFlagsEnvToState({ agent_runtime_slim_state: true }).enableSlimAgentState,
+      ).toBe(true);
+
+      const config = FeatureFlagsSchema.parse({ agent_runtime_slim_state: ['user-1'] });
+      expect(mapFeatureFlagsEnvToState(config, 'user-1').enableSlimAgentState).toBe(true);
+      expect(mapFeatureFlagsEnvToState(config, 'user-2').enableSlimAgentState).toBe(false);
     });
+  });
+});
 
-    it('maps true to enabled for every user', () => {
-      const config = { agent_runtime_strip_operation_toolset: true };
-
-      expect(mapFeatureFlagsEnvToState(config, 'user-1').enableStripOperationToolset).toBe(true);
-      expect(mapFeatureFlagsEnvToState(config).enableStripOperationToolset).toBe(true);
-    });
-
-    it('maps a user allowlist to the listed users only', () => {
-      const config = FeatureFlagsSchema.parse({
-        agent_runtime_strip_operation_toolset: ['user-1'],
-      });
-
-      expect(mapFeatureFlagsEnvToState(config, 'user-1').enableStripOperationToolset).toBe(true);
-      expect(mapFeatureFlagsEnvToState(config, 'user-2').enableStripOperationToolset).toBe(false);
-      expect(mapFeatureFlagsEnvToState(config).enableStripOperationToolset).toBe(false);
-    });
+describe('webhook flag', () => {
+  it('defaults off and only enables allowlisted users', () => {
+    expect(DEFAULT_FEATURE_FLAGS.webhook).toBe(false);
+    expect(mapFeatureFlagsEnvToState(DEFAULT_FEATURE_FLAGS, 'u1').enableWebhook).toBe(false);
+    expect(mapFeatureFlagsEnvToState({ webhook: true }, 'u1').enableWebhook).toBe(true);
+    expect(mapFeatureFlagsEnvToState({ webhook: ['u1'] }, 'u1').enableWebhook).toBe(true);
+    expect(mapFeatureFlagsEnvToState({ webhook: ['u1'] }, 'u2').enableWebhook).toBe(false);
   });
 });
