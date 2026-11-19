@@ -18,6 +18,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false # otherwise the checkout token overrides the PAT
 
       - name: Sync upstream changes
         id: sync
