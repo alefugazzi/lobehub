@@ -613,7 +613,7 @@ const spawnCliAgent = async (
   const proc = spawnManaged(cliSpawnPlan.command, cliSpawnPlan.args, {
     cwd,
     detached,
-    env: childEnv,
+    env: cliSpawnPlan.env ?? childEnv,
     stdio: ['pipe', 'pipe', 'pipe'],
   });
 
@@ -855,8 +855,6 @@ const spawnCliAgent = async (
         const plan = await buildAgentInput('antigravity', prompt, options.inputOptions);
         return antigravityLive.send(plan.stdin, sendOptions?.uuid);
       },
-      // Antigravity stream-json input only supports text content blocks.
-      supportsSteerImages: false,
     }),
     kill: (signal: NodeJS.Signals = 'SIGINT') => {
       killedByUs = true;
