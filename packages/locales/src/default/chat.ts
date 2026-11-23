@@ -709,6 +709,17 @@ export default {
   'heteroAgent.permissionMode.switchUnsupported':
     'lh on this device can’t switch a running session. The new mode applies from the next message; update lh to switch mid-run.',
   'heteroAgent.permissionMode.saveFailed': 'Couldn’t save the permission mode. Try again.',
+  'heteroAgent.planMode.label': 'Plan',
+  'heteroAgent.planMode.tooltipOff':
+    'Plan first: Codex explores and proposes a plan instead of making changes. Codex still has full access. A new topic in this directory starts with your last choice.',
+  'heteroAgent.planMode.tooltipOn':
+    'Plan is on: Codex proposes a plan instead of making changes. Turn it off, or choose Execute plan, to let it carry the plan out.',
+  'heteroAgent.planMode.nextTurn': 'Applies from the next turn',
+  'heteroAgent.planMode.saveFailed': 'Couldn’t save the Plan setting. Try again.',
+  'heteroAgent.planMode.unavailable.appServerLab':
+    'Plan needs the Codex App Server Runtime. Turn it on in Settings → Labs.',
+  'heteroAgent.planMode.unavailable.unsupported':
+    'Plan isn’t available where this agent runs: it needs Codex app-server on this computer, or a device whose Codex and lh support it. Update lh on the device to use it.',
   'heteroAgent.fullAccess.label': 'Full access',
   'heteroAgent.fullAccess.tooltip':
     'The local coding agent runs with full read/write access to the working directory. Switching permission modes is not available yet.',
@@ -1673,6 +1684,9 @@ export default {
   'connectAgent.create.stepDevice':
     'Step 1 of 3 · Pick the machine your agents run on — it will be scanned automatically.',
   'connectAgent.create.stepAgents': 'Step 2 of 3 · {{device}}',
+  'connectAgent.create.stepAgentsInline': 'Step 1 of 2 · {{device}}',
+  'connectAgent.create.stepConfirmInline': 'Step 2 of 2 · Name it for your agent list',
+  'connectAgent.create.switchDevice': 'Run on',
   'connectAgent.create.stepConfirm': 'Step 3 of 3 · Name it for your agent list',
   'connectAgent.create.thisDevice': 'This device',
   'connectAgent.create.connectedDevices': 'Connected devices',
@@ -2157,9 +2171,11 @@ export default {
   'supervisor.todoList.title': 'Tasks Completed',
   'tab.groupProfile': 'Group Profile',
   'tab.backToChat': 'Back to chat',
+  'tab.group.advanced': 'Advanced',
+  'tab.group.growth': 'Growth',
   'tab.group.identity': 'Identity',
   'tab.group.shape': 'Shape',
-  'tab.group.setup': 'Configure',
+  'tab.group.setup': 'Capabilities',
   'tab.context': 'Context',
   'tab.engine': 'Engine',
   'tab.environment': 'Environment',
