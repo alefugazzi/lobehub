@@ -154,6 +154,8 @@ export default {
     'After deletion completes, the same email cannot be used to sign up again for {{days}} days.',
   'accountDeletion.requestButton': 'Request Account Deletion',
   'accountDeletion.requestFailed': 'Failed to request account deletion',
+  'accountDeletion.requestFailedRetry':
+    "Couldn't submit your deletion request. Check your connection and try again.",
   'accountDeletion.requestSuccess': 'Deletion request submitted',
   'accountDeletion.sectionTitle': 'Account Deletion',
   'accountDeletion.title': 'Delete Account',
@@ -619,6 +621,8 @@ export default {
   'agentDocuments.overwriteConfirm.warning':
     'Existing documents with the same filename will be replaced.',
   'agentDocuments.title': 'Agent Documents',
+  'agentSkillModal.github.connectFailedRetry':
+    "Couldn't connect GitHub. Check your network and try again.",
   'analytics.telemetry.desc': 'Help us improve {{appName}} with anonymous usage data',
   'analytics.telemetry.title': 'Send Anonymous Usage Data',
   'analytics.title': 'Analytics',
@@ -783,7 +787,6 @@ export default {
   'creds.errors.publicCredExists':
     'This workspace already shares a credential with this key. Remove it before publishing this one.',
   'creds.file.authRequired': 'Please sign in to the Market first',
-  'creds.file.uploadFailed': 'File upload failed',
   'creds.file.uploadSuccess': 'File uploaded successfully',
   'creds.file.uploading': 'Uploading...',
   'creds.form.addEnvVar': 'Add variable',
@@ -1163,7 +1166,6 @@ export default {
   'hotkey.sendMessage.desc': 'The other key combination inserts a line break',
   'hotkey.sendMessage.title': 'Send Message',
   'hotkey.title': 'Hotkeys',
-  'hotkey.updateError': 'Failed to update hotkey: Network or system error',
   'hotkey.updateSuccess': 'Hotkey updated successfully',
   'llm.aesGcm':
     'Your keys and proxy address will be encrypted using the <1>AES-GCM</1> encryption algorithm',
@@ -1477,11 +1479,10 @@ export default {
   'settingAgent.tools.type.plugin': 'Plugin or skill',
   'settingAgent.tools.type.skill': 'Skill',
   'settingAgent.driver.groupCli': 'Heterogeneous agent · local CLI',
-  'settingAgent.driver.groupHarness': 'Built by LobeHub',
+  'settingAgent.driver.groupHarness': 'Built-in',
   'settingAgent.driver.groupRemote': 'Heterogeneous agent · remote platform',
   'settingAgent.driver.harness': 'LobeHub',
-  'settingAgent.driver.brings.harness':
-    "LobeHub's own harness: you choose the model, tools and instruction.",
+  'settingAgent.driver.brings.harness': 'You choose the model, tools, and instruction.',
   'settingAgent.driver.brings.hetero':
     'Brings its own model, tools and instruction; you set where it runs.',
   'settingAgent.driver.switchBackHarness': 'The core instruction and tools take effect again.',
@@ -1702,6 +1703,9 @@ export default {
   'settingChatAppearance.showImageReadPreview.desc':
     'When off, tool calls that read an image fold in with the other calls and stay collapsed until clicked.',
   'settingChatAppearance.showImageReadPreview.title': 'Show Image Reads on Their Own',
+  'settingChatAppearance.showMessageUsage.desc':
+    'Show the model that wrote each reply and the tokens it used, below the reply.',
+  'settingChatAppearance.showMessageUsage.title': 'Show model and token usage',
   'settingChatAppearance.title': 'Chat Appearance',
   'settingChatAppearance.transitionMode.desc': 'Choose how chat messages appear',
   'settingChatAppearance.transitionMode.options.fadeIn': 'Fade In',
@@ -1710,9 +1714,6 @@ export default {
   'settingChatAppearance.transitionMode.options.none.value': 'None',
   'settingChatAppearance.transitionMode.options.smooth': 'Smooth',
   'settingChatAppearance.transitionMode.title': 'Transition Animation',
-  'settingCommon.devMode.desc':
-    'Show technical details and manual controls for chats, models, and local tools. This does not change model responses.',
-  'settingCommon.devMode.title': 'Advanced tools',
   'settingCommon.lang.autoMode': 'Follow System',
   'settingCommon.lang.title': 'Language',
   'settingCommon.liteMode.desc': 'Simplify the interface and hide advanced features',
@@ -2300,7 +2301,6 @@ When I am ___, I need ___
   'systemAgent.verify.title': 'Task Acceptance',
   'tab.about': 'About',
   'tab.advanced': 'Advanced',
-  'tab.advanced.appUpdates.title': 'App updates',
   'tab.advanced.gatewayMode.desc':
     'Run supported agent tasks through the cloud Gateway by default. Individual agents can override this from the chat menu.',
   'tab.advanced.gatewayMode.title': 'Gateway Mode',
@@ -4269,11 +4269,11 @@ When I am ___, I need ___
   'workspace.onboarding.step4.subtitleWithAgents':
     '{{count}} agent(s) ready to help. Jump in and start collaborating with your team.',
   'workspace.onboarding.step4.marketProfileNudge':
-    "We've set up a Community profile for <strong>{{name}}</strong> so workspace agents can be installed. <cta>Customize it in the Marketplace</cta>.",
+    "We've set up a Community profile for <strong>{{name}}</strong> so workspace agents can be installed. <cta>Customize it in Plugins</cta>.",
   'workspace.onboarding.step4.marketProfileAdjust':
-    "We've automatically created a Community profile for your workspace. <cta>Adjust it in the Marketplace</cta>.",
+    "We've automatically created a Community profile for your workspace. <cta>Adjust it in Plugins</cta>.",
   'workspace.onboarding.step4.marketProfileCreate':
-    "We couldn't set up your Community profile automatically. <cta>Create one in the Marketplace</cta> so workspace agents can be shared.",
+    "We couldn't set up your Community profile automatically. <cta>Create one in Plugins</cta> so workspace agents can be shared.",
   'workspace.onboarding.step4.cta': 'Enter workspace',
   'workspaceSetting.breadcrumb.settings': 'Settings',
   'workspaceSetting.devices.connectTitlePrivate': 'Add private device',
@@ -4820,7 +4820,6 @@ When I am ___, I need ___
   'environments.namePlaceholder': 'Environment name',
   'environments.empty': 'No environments yet',
   'environments.removeFailed': 'Could not delete this environment',
-  'environments.saveFailed': 'Could not save this change',
   'environments.instances.removeFailed': 'Could not delete this copy',
   'environments.instances.removing': 'Deleting — removing its folder and everything in it',
   'environments.instances.removeConfirmTitle': 'Delete copy {{name}}?',
@@ -5457,6 +5456,9 @@ When I am ___, I need ___
   'automations.empty.title': 'No automations yet',
   'automations.empty.desc':
     'Ask an agent to keep an eye on a connector for you, like "Tell me when CI fails on this PR". Subscriptions you approve show up here.',
+  'creds.file.uploadFailedRetry': 'File upload failed. Check the file and try again.',
+  'devices.share.failedRetry':
+    "Couldn't share this device to {{name}}. Make sure the device is online, then try again.",
   'environments.form.addRepository': 'Add repository',
   'environments.form.noRepositories': 'No repositories. Conversations start in an empty folder.',
   'environments.form.noVariables': 'No variables',
@@ -5477,6 +5479,30 @@ When I am ___, I need ___
   'environments.form.bootstrapAfterRepositories':
     "Runs at the top of the working directory, after each repository's own setup. Setup for a single repository goes on that repository.",
   'environments.form.duplicateFolder': 'Another repository already uses this folder.',
+  'environments.saveFailedRetry': 'Could not save this change. Check your network and try again.',
+  'hotkey.updateErrorRetry': "Couldn't save this hotkey. Try recording it again.",
+  'settingAgent.avatar.uploadFailed':
+    "Couldn't upload the image. Check your network and choose it again.",
+  'storageOverage.capUpdateFailedRetry':
+    "Couldn't save the monthly cap. Check the amount and try again.",
+  'storageOverage.disableFailedRetry': "Couldn't disable storage pay-as-you-go. Try again.",
+  'storageOverage.enableFailedRetry': "Couldn't enable storage pay-as-you-go. Try again.",
+  'taskLabels.form.saveFailedRetry': "Couldn't save the label. Check your network and try again.",
+  'workspace.billing.paymentMethods.portalFailedRetry':
+    "Couldn't open the billing portal. Check your network and try again.",
+  'workspace.billingPage.billing.changeFailedRetry':
+    "Couldn't update the subscription. Check your connection and try again.",
+  'workspace.billingPage.credits.autoTopUp.saveFailed':
+    "Couldn't save auto top-up settings. Check your connection and try again.",
+  'workspace.billingPage.credits.autoTopUp.toggleFailed': "Couldn't change auto top-up. Try again.",
+  'workspace.billingPage.credits.topUp.purchaseFailed':
+    "Couldn't complete the top-up. Check your connection and try again.",
+  'workspace.upgradeModal.payFailedRetry':
+    "Couldn't start checkout. Check your connection and try again.",
+  'workspace.wizard.step2.createFailedRetry':
+    "Couldn't create the workspace. Check your connection and try again.",
+  'workspace.wizard.step2.payFailedRetry':
+    "Couldn't start checkout. Check your connection and try again.",
   'workspaceSetting.devices.enrollPrivateDesc':
     'Run this on the machine you want to connect. It starts private to you; publish it to the workspace from its card menu.',
   'market.apps.viewAll': 'View all',
@@ -5573,4 +5599,12 @@ When I am ___, I need ___
   'market.skills.title': 'Skills',
   'market.skills.uninstall': 'Uninstall',
   'market.skills.version': 'Version',
+  'workspaceSetting.labels.archive.failedRetry':
+    "Couldn't archive the label. Check your network and try again.",
+  'workspaceSetting.labels.delete.failedRetry':
+    "Couldn't delete the label. Check your network and try again.",
+  'workspaceSetting.labels.form.saveFailedRetry':
+    "Couldn't save the label. Check your network and try again.",
+  'workspace.auditLog.actions.budget.model_policy_removed': 'Model tier rule removed',
+  'workspace.auditLog.actions.budget.model_policy_updated': 'Model tier rule updated',
 };
