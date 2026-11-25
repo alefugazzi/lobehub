@@ -135,6 +135,11 @@ export default {
   'ask.submit': 'Send answer',
   'ask.waitingFor': 'Waiting for {{name}} to answer',
   'actionFailed': 'Something went wrong. Try again.',
+  'a2uiAction.empty': '—',
+  'a2uiAction.no': 'No',
+  'a2uiAction.submitted': 'Submitted',
+  'a2uiAction.submittedTitle': 'Submitted “{{title}}”',
+  'a2uiAction.yes': 'Yes',
   'send': 'Send',
   'sendFailed': 'Message was not sent. Your draft is preserved; try again.',
   'shareVisitorReadOnlyNotice':
@@ -158,6 +163,8 @@ export default {
   'threadCard.messages_other': '{{count}} messages',
   'closeThread': 'Close thread',
   'thread': 'Thread',
+  'collapseThreads': 'Collapse threads',
+  'expandThreads': 'Expand threads',
   /** Heads the Channel's own actions in a menu that also holds a thread's. */
   'channel': 'Channel',
   'threadDivider': 'Replies in this thread',
